@@ -4,29 +4,33 @@ import {Octokit} from '@octokit/rest'
 import {useQuery, useMutation} from '@tanstack/react-query'
 import Markdown from 'markdown-to-jsx'
 import Image from 'next/image'
+import Link from 'next/link'
 import {useQueryState} from 'nuqs'
-import {useMemo, useState} from 'react'
+import {useMemo} from 'react'
+import {toast, Toaster} from 'sonner'
+import * as licenseTexts from '@/app/fork/licenses'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Input} from '@/components/ui/input'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Skeleton} from '@/components/ui/skeleton'
-import {useToast} from '@/hooks/use-toast'
 
-interface AddValueOptions {
+export interface AddValueOptions {
   octokit: Octokit
   codebase: {owner: string; repo: string}
   sourceRepo: {owner: string; repo: string}
   requestedForkName: string
   improve: (params: {path: string; content: string; readme: {content: string}}) => string
+  toast: typeof toast
 }
 
-interface GitHubForkProps {
+export interface GitHubForkProps {
   octokit: Octokit
   addValue?: (options: AddValueOptions) => Promise<void>
   inputMessages?: Partial<Messages>
 }
 
-interface Replacement {
+export interface Replacement {
   from: string
   to: string
 }
@@ -35,27 +39,32 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
   const messages = {...defaultMessages, ...inputMessages}
   const [repoInput, setRepoInput] = useQueryState('repo', {defaultValue: ''})
   const [forkName, setForkName] = useQueryState('fork', {defaultValue: ''})
-  const [replacements, setReplacements] = useState<Replacement[]>([{from: '', to: ''}])
-  const {toast} = useToast()
+  const [replacements, setReplacements] = useQueryState('replacements', {
+    defaultValue: [{from: '', to: ''}],
+    parse: value => JSON.parse(value) as Replacement[],
+    serialize: value => JSON.stringify(value),
+  })
+  const [showFullReadme, setShowFullReadme] = useQueryState('showFullReadme', {
+    defaultValue: false,
+    parse: value => value === 'true',
+    serialize: value => value.toString(),
+  })
+  const [license, setLicense] = useQueryState('license', {defaultValue: ''})
 
   const {data: authenticatedUser} = useQuery({
     queryKey: ['authenticatedUser'],
     queryFn: async () => {
-      console.log('Fetching authenticated user...')
-      const {data} = await octokit.users.getAuthenticated()
-      console.log('Authenticated user fetched:', data.login)
-      return data.login
+      const {data} = await octokit.users.getAuthenticated().catch(() => ({data: null}))
+      return data?.login || null
     },
   })
 
   const fetchRepoInfo = async () => {
     if (!repoInput) return null
-    console.log('Fetching repository information...')
     const [owner, repo] = repoInput.split('/')
     const {data} = await octokit.repos.get({owner, repo})
     const readmeResponse = await octokit.repos.getReadme({owner, repo})
     const readmeContent = atob(readmeResponse.data.content)
-    console.log('Repository information fetched')
     return {...data, readmeContent}
   }
 
@@ -87,19 +96,48 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
     }
   }
 
-  const findExistingFork = async (sourceOwner: string, sourceRepo: string): Promise<string | null> => {
-    console.log('Checking for existing forks...')
-    const {data: userRepos} = await octokit.repos.listForAuthenticatedUser()
+  const findExistingFork = async ({
+    sourceOwner,
+    sourceRepo,
+    requestedForkName,
+    lookForOtherNames = false,
+  }: {
+    sourceOwner: string
+    sourceRepo: string
+    requestedForkName: string
+    lookForOtherNames?: boolean
+  }): Promise<string | null> => {
+    toast('Checking for existing forks...')
+    const userRepos = await octokit.paginate(octokit.repos.listForAuthenticatedUser, {
+      per_page: 100,
+    })
+
     for (const repo of userRepos) {
       if (repo.fork) {
+        if (
+          !lookForOtherNames &&
+          repo.name.toLowerCase() !== sourceRepo.toLowerCase() &&
+          repo.name.toLowerCase() !== requestedForkName.toLowerCase()
+        ) {
+          console.log(`skipping ${repo.name} because the name doesn't match ${sourceRepo} or ${requestedForkName}`)
+          continue
+        }
         const {data: repoDetails} = await octokit.repos.get({owner: repo.owner.login, repo: repo.name})
-        if (repoDetails.parent && repoDetails.parent.full_name === `${sourceOwner}/${sourceRepo}`) {
-          console.log(`Existing fork found: ${repo.name}`)
+        if (
+          repoDetails.parent &&
+          repoDetails.parent.full_name.toLowerCase() === `${sourceOwner}/${sourceRepo}`.toLowerCase()
+        ) {
+          toast('Existing fork found')
           return repo.name
         }
       }
     }
-    console.log('No existing fork found')
+
+    if (!lookForOtherNames) {
+      return findExistingFork({sourceOwner, sourceRepo, requestedForkName, lookForOtherNames: true})
+    }
+
+    toast('No existing fork found')
     return null
   }
 
@@ -112,13 +150,9 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
 
       const [sourceOwner, sourceRepo] = repoInput.split('/')
 
-      console.log('Checking if fork already exists...')
       const forkExists = await checkRepoExists(authenticatedUser, forkName)
 
-      if (forkExists) {
-        console.log('Fork already exists, skipping creation')
-      } else {
-        console.log('Creating fork...')
+      if (!forkExists) {
         await octokit.repos.createFork({
           owner: sourceOwner,
           repo: sourceRepo,
@@ -126,46 +160,38 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
         })
       }
 
-      const toastMessages = [
-        messages.fork_progress_1,
-        messages.fork_progress_2,
-        messages.fork_progress_3,
-        messages.fork_progress_4,
-      ]
+      const progressMessages = [...messages.fork_progress_messages]
 
       let existingFork: string | null = null
       const startTime = Date.now()
 
       for (let i = 0; i < 12; i++) {
         if (await checkRepoExists(authenticatedUser, forkName)) {
-          console.log('Fork is now available')
           break
         }
 
-        if (Date.now() - startTime > 10_000 && !existingFork) {
-          existingFork = await findExistingFork(sourceOwner, sourceRepo)
+        if (Date.now() - startTime > 3000 && !existingFork) {
+          existingFork = await findExistingFork({sourceOwner, sourceRepo, requestedForkName: forkName})
           if (existingFork) {
-            console.log(`Using existing fork: ${existingFork}`)
-            toast({
-              title: messages.using_existing_fork_title,
+            toast(messages.using_existing_fork_title, {
               description: messages.using_existing_fork_description(existingFork),
             })
             break
           }
         }
 
-        const toastIndex = Math.floor(i / 3)
-        toast({
-          title: messages.fork_progress_title,
-          description: toastMessages[toastIndex % toastMessages.length],
-        })
+        const message = progressMessages.shift()
+        if (message) {
+          toast(messages.fork_progress_title, {
+            description: message,
+          })
+        }
         await new Promise(r => setTimeout(r, 5000))
       }
 
       const finalForkName = existingFork || forkName
 
       if (addValue) {
-        console.log('Calling addValue function...')
         await addValue({
           octokit,
           codebase: {owner: authenticatedUser, repo: finalForkName},
@@ -173,65 +199,84 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
           requestedForkName: forkName,
           improve: params => {
             let improvedContent = params.content
+            if (params.path.toLowerCase().includes('license') && license in licenseTexts) {
+              improvedContent = licenseTexts[license] as string
+            }
             for (const replacement of replacements) {
               improvedContent = improvedContent.replaceAll(replacement.from, replacement.to)
             }
             return improvedContent
           },
+          toast,
         })
-        console.log('addValue function completed')
       }
 
       return {owner: authenticatedUser, repo: finalForkName}
     },
     onSuccess: data => {
-      toast({
-        title: messages.fork_success_title,
+      toast.success(messages.fork_success_title, {
         description: messages.fork_success_description({owner: data.owner, repo: data.repo}),
+        action: {
+          label: 'Open Fork',
+          onClick: () => window.open(`https://github.com/${data.owner}/${data.repo}`, '_blank'),
+        },
       })
     },
     onError: (error: Error) => {
-      console.error('Error forking repository:', error)
-      toast({
-        title: messages.fork_error_title,
+      toast.error(messages.fork_error_title, {
         description: error.message,
-        variant: 'destructive',
       })
     },
   })
 
   const handleFork = () => {
-    forkMutation.mutate()
+    if (!authenticatedUser) {
+      const pathAndSearch = window.location.href.replace(window.location.origin, '')
+      window.location.href = `/api/auth/signin?${new URLSearchParams({callbackUrl: pathAndSearch}).toString()}`
+      return
+    }
+    if (forkMutation.isSuccess) {
+      window.open(`https://github.com/${forkMutation.data.owner}/${forkMutation.data.repo}`, '_blank')
+    } else {
+      forkMutation.mutate()
+    }
   }
 
   const addReplacement = () => {
     setReplacements([...replacements, {from: '', to: ''}])
+    forkMutation.reset()
   }
 
   const updateReplacement = (index: number, field: 'from' | 'to', value: string) => {
     const newReplacements = [...replacements]
     newReplacements[index][field] = value
     setReplacements(newReplacements)
+    forkMutation.reset()
   }
 
   const removeReplacement = (index: number) => {
     const newReplacements = replacements.filter((_, i) => i !== index)
     setReplacements(newReplacements)
+    forkMutation.reset()
   }
 
   return (
     <div className="container mx-auto p-4 max-w-2xl">
-      <Card className="bg-[#FFF5EC] border-[#001F3F]">
+      <Card className="bg-[#FFF5EC] border-[#001F3F] relative">
         <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-KlH3EDYYcbqGr7Nl3JCQEIwo9Ky5bJ.webp"
-            alt="Fork Logo"
-            width={64}
-            height={64}
-          />
+          <Link href="/">
+            <Image src="/logo.webp" alt="Fork Logo" width={64} height={64} />
+          </Link>
           <div>
             <CardTitle className="text-[#001F3F]">{messages.card_title}</CardTitle>
             <CardDescription className="text-[#001F3F] opacity-70">{messages.card_description}</CardDescription>
+            {authenticatedUser && (
+              <div className="absolute top-4 right-4">
+                <Link href="/api/auth/signout" className="text-sm text-[#001F3F] hover:underline">
+                  Sign out
+                </Link>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -260,9 +305,19 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
               <div className="border rounded-md p-4 bg-[#FFD7BA] border-[#001F3F]">
                 <h3 className="text-lg font-semibold text-[#001F3F]">{repoInfo.full_name}</h3>
                 <p className="text-sm text-[#001F3F] opacity-70">{repoInfo.description}</p>
-                <div className="mt-2 text-sm text-[#001F3F] prose max-w-none">
+                <div
+                  className={`mt-2 text-sm text-[#001F3F] prose max-w-none ${showFullReadme ? '' : 'max-h-40 overflow-hidden'}`}
+                >
                   <Markdown>{repoInfo.readmeContent}</Markdown>
                 </div>
+                {repoInfo.readmeContent.length > 500 && (
+                  <Button
+                    onClick={() => setShowFullReadme(!showFullReadme)}
+                    className="mt-2 bg-[#87CEEB] text-[#001F3F] hover:bg-[#5CACEE]"
+                  >
+                    {showFullReadme ? 'Show Less' : 'Show More'}
+                  </Button>
+                )}
               </div>
             ) : null}
 
@@ -310,15 +365,35 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
                 {messages.add_more_value_button}
               </Button>
             </div>
-
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-[#001F3F]">{messages.relicense_title}</h4>
+              <Select value={license} onValueChange={setLicense}>
+                <SelectTrigger className="w-full border-[#001F3F] text-[#001F3F]">
+                  <SelectValue placeholder={messages.relicense_placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wtfpl">WTFPL</SelectItem>
+                  <SelectItem value="apache2">Apache License 2.0</SelectItem>
+                  <SelectItem value="unlicense">The Unlicense</SelectItem>
+                  <SelectItem value="mit">MIT License</SelectItem>
+                  <SelectItem value="nochange">Keep original license (not recommended)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {error && <p className="text-red-500 text-sm">{messages.repo_fetch_error({error: error.message})}</p>}
 
             <Button
               onClick={handleFork}
-              disabled={!repoInfo || !forkName || !!forkNameError || forkMutation.isPending}
+              disabled={authenticatedUser ? !repoInfo || !forkName || !!forkNameError || forkMutation.isPending : false}
               className="w-full text-lg py-6 bg-[#87CEEB] text-[#001F3F] hover:bg-[#5CACEE]"
             >
-              {forkMutation.isPending ? messages.forking_button : messages.fork_button}
+              {authenticatedUser
+                ? forkMutation.isPending
+                  ? messages.forking_button
+                  : forkMutation.isSuccess
+                    ? messages.fork_success_button
+                    : messages.fork_button
+                : 'Login to ' + messages.fork_button}
             </Button>
 
             {forkMutation.isError && (
@@ -327,6 +402,7 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
           </div>
         </CardContent>
       </Card>
+      <Toaster />
     </div>
   )
 }
@@ -349,12 +425,15 @@ export const defaultMessages = {
   fork_name_required: 'Fork name is required',
   user_not_authenticated: 'User not authenticated',
   fork_progress_title: 'Fork in progress',
-  fork_progress_1: 'Still working... GitHub is processing your request!',
-  fork_progress_2: 'Hang tight! Your fork is being prepared...',
-  fork_progress_3: 'Almost there! GitHub is setting up your repo...',
-  fork_progress_4: 'Just a bit longer... Your fork is on its way!',
+  fork_progress_messages: [
+    'Still working... GitHub is processing your request!',
+    'Hang tight! Your fork is being prepared...',
+    'Almost there! GitHub is setting up your repo...',
+    'Just a bit longer... Your fork is on its way!',
+  ],
   fork_timeout:
     'Timed out waiting for fork to be available. Please try refreshing the page or check your GitHub account.',
+  fork_success_button: `Open Fork`,
   fork_success_title: 'Fork successful!',
   fork_success_description: ({owner, repo}: {owner: string; repo: string}) =>
     `Your fork is ready at https://github.com/${owner}/${repo}`,
@@ -364,6 +443,8 @@ export const defaultMessages = {
   using_existing_fork_title: 'Using Existing Fork',
   using_existing_fork_description: (forkName: string) =>
     `An existing fork named "${forkName}" was found and will be used.`,
+  relicense_title: 'Relicense',
+  relicense_placeholder: 'Select a license',
 }
 
 export type Messages = typeof defaultMessages

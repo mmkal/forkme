@@ -11,6 +11,22 @@ const mainFont = MainFont({
   display: 'swap',
 })
 
+export const metadata: Metadata = {
+  title: 'forkme ⑂',
+  description: 'Fork yourself and get funded faster',
+  openGraph: {
+    title: 'forkme ⑂',
+    description: 'Fork yourself and get funded faster',
+    images: ['/logo.webp'], // Add your Open Graph image path here
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'forkme ⑂',
+    description: 'Fork yourself and get funded faster',
+    images: ['/logo.webp'], // Add your Twitter card image path here
+  },
+}
+
 export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 1,
@@ -25,9 +41,9 @@ export default async function RootLayout({children}: {children: React.ReactNode}
       {/* <Suspense>
         <PostHogPageview />
       </Suspense> */}
-      <body className="verbalistBody">
+      <body className="forkmeBody">
         {/* <Header /> */}
-        <main className="opacity-50">{children}</main>
+        <main className="">{children}</main>
         {/* <Toaster /> */}
       </body>
     </html>
