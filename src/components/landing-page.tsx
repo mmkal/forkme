@@ -10,8 +10,8 @@ const WobbleBox = ({children}: {children: React.ReactNode}) => {
   return (
     <motion.div
       initial={{rotate: initial}}
-      whileHover={{rotate: [0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
-      whileDrag={{rotate: [0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      whileHover={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      whileDrag={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       whileFocus={{rotate: 0}}
       className="relative"
     >
@@ -48,7 +48,8 @@ export function LandingPageComponent() {
           animate={{y: 0}}
           transition={{type: 'spring', stiffness: 100, delay: 0.5}}
         >
-          <span className="inline-block transform hover:rotate-12 transition-transform duration-300">🍴</span> forkme
+          <span className="inline-block transform hover:rotate-12 transition-transform duration-300 hidden">🍴</span>{' '}
+          forkme
         </motion.h1>
       </WobbleBox>
 
@@ -170,6 +171,12 @@ export function LandingPageComponent() {
           </motion.div>
         </WobbleBox>
       </div>
+      <WobbleBox>
+        <video loop muted autoPlay className="w-full max-w-4xl aspect-video rounded-lg shadow-lg m-10">
+          <source src={`/typescript-hypescript.webm`} type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+      </WobbleBox>
     </div>
   )
 }

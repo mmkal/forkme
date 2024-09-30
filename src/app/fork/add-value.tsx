@@ -82,11 +82,18 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
   if (messages.some(Boolean)) {
     toast(`Updating repository metadata`, {description: messages.filter(Boolean).join('\n\n')})
 
+    const improvedDescription = improve({
+      path: 'description',
+      content: upstreamRepo.description ?? '',
+      readme: upstreamReadme,
+    })
+
     await octokit.repos.update({
       owner: codebase.owner,
       repo: codebase.repo,
       default_branch: forkmeBranch,
       name: requestedForkName,
+      description: improvedDescription,
     })
   }
 
@@ -104,6 +111,8 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
       if (!item.path) return false
       if (item.path?.toLowerCase().includes('test')) return false
       if (mimeType.getType(item.path)?.startsWith('image/')) return false
+      if (mimeType.getType(item.path)?.startsWith('video/')) return false
+      if (mimeType.getType(item.path)?.startsWith('audio/')) return false
       if (item.size && item.size > 1024 * 1024) return false
       return true
     })
