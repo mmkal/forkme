@@ -1,0 +1,17 @@
+node_modules
+dist
+*ignoreme*
+coverage
+
+# ignore non-pnpm lockfiles
+package-lock.json
+yarn.lock
+.sst
+.next
+
+.env
+.env.*
+.DS_Store
+.eslint-config-inspector
+test-results
+.aider*
