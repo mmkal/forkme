@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import {motion} from 'framer-motion'
@@ -13,9 +14,9 @@ const WobbleBox = ({children}: {children: React.ReactNode}) => {
     <motion.div
       initial={{rotate: initial}}
       whileHover={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
-      whileDrag={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
-      whileFocus={{rotate: 0}}
-      whileTap={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      // whileDrag={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      // whileFocus={{rotate: 0}}
+      // whileTap={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       whileInView={{rotate: [initial, 0, -5, 5, -5, 5, 0, initial], transition: {duration: 0.5}}}
       className="relative"
     >
@@ -29,7 +30,7 @@ export function LandingPageComponent() {
   const [forkName, setForkName] = useState('')
 
   return (
-    <div className="min-h-screen bg-[#f0ebe0] flex flex-col items-center justify-center p-4 overflow-hidden pb-[300px]">
+    <div className="min-h-screen bg-[#f0ebe0] flex flex-col items-center justify-center p-4 overflow-hidden pb-2">
       <WobbleBox>
         <motion.div
           initial={{scale: 0}}
@@ -52,7 +53,7 @@ export function LandingPageComponent() {
           animate={{y: 0}}
           transition={{type: 'spring', stiffness: 100, delay: 0.5}}
         >
-          <span className="inline-block transform hover:rotate-12 transition-transform duration-300 hidden">🍴</span>{' '}
+          {/* <span className="inline-block transform hover:rotate-12 transition-transform duration-300">🍴</span>{' '} */}
           forkme
         </motion.h1>
       </WobbleBox>
@@ -68,7 +69,7 @@ export function LandingPageComponent() {
           whileHover={{rotate: 360, scale: 1.2}}
           transition={{duration: 0.5}}
         >
-          <GitFork className="w-12 h-12 text-[#1a237e]" />
+          <GitFork className="w-6 h-6 text-[#1a237e]" />
         </motion.div>
 
         <h2 className="text-4xl font-bold mb-6 text-[#1a237e]">Fork me, Beautiful</h2>
@@ -179,7 +180,7 @@ export function LandingPageComponent() {
         <div className="mt-16 text-center">
           <h2 className="text-4xl font-bold text-[#1a237e] mb-4">See it in action</h2>
           <p className="text-xl text-[#4a148c] mb-8">
-            Or just take a look at{' '}
+            Or take a look at{' '}
             <a
               href="https://github.com/mmkal/hypescript"
               target="_blank"
@@ -188,7 +189,7 @@ export function LandingPageComponent() {
             >
               mmkal/hypescript
             </a>{' '}
-            - a Series-B-funded SaaS fork of TypeScript
+            - a Series-B-funded* SaaS fork of TypeScript
           </p>
         </div>
         <video
@@ -203,7 +204,7 @@ export function LandingPageComponent() {
           }}
           // controls
           // controlsList="nodownload noremoteplayback nofullscreen"
-          className="w-full h-[800px] max-w-[80vw] aspect-video rounded-lg DISABLEDshadow-lg mt-5 mb-5"
+          className="w-full h-[800px] max-h-[100vw] max-w-[80vw] aspect-video rounded-lg DISABLEDshadow-lg mt-5 mb-5"
         >
           <source src={`/typescript-hypescript.webm`} type="video/webm" />
           Your browser does not support the video tag.
@@ -211,40 +212,60 @@ export function LandingPageComponent() {
       </WobbleBox>
 
       <div className="mt-16 text-center">
-        <h2 className="text-3xl font-bold text-[#1a237e] mb-8 w-[100vw]">
-          Fork open-source projects built by trusted companies:
+        <h2 className="text-3xl font-bold text-[#1a237e] mb-8 max-w-[950vw]">
+          Fork open-source projects built by your favourite organizations:
         </h2>
         <div className="flex flex-wrap justify-center items-center gap-8">
-          {['Google', 'Microsoft', 'Amazon', 'Airbnb', 'Meta', 'Netflix', 'Uber']
-            .flatMap((s, i, arr) => {
-              // if (i === arr.length - 1) return [s, ...arr, ...arr, ...arr]
-              return [s]
-            })
-            .map(company => (
-              <motion.div
-                key={company}
-                className="bg-white p-4 rounded-lg shadow-md"
-                whileHover={{scale: 1.1}}
-                whileTap={{scale: 0.9}}
-                // initial={{x: 0}}
-                // animate={{x: -1000}}
-              >
-                <Link href={`/fork?repo=${company.toLowerCase()}/`}>
-                  <Image
-                    src={`/forkable-logos/${company.toLowerCase()}.svg`}
-                    alt={`${company} logo`}
-                    width={100}
-                    height={50}
-                  />
-                </Link>
-              </motion.div>
-            ))}
+          {['Google', 'Microsoft', 'Amazon', 'Airbnb', 'Meta', 'Netflix', 'Uber', 'WordPress'].map(company => {
+            const repoMap = {
+              Google: 'google/guava',
+              Microsoft: 'microsoft/typescript',
+              Amazon: 'aws/aws-cdk',
+              Airbnb: 'airbnb/javascript',
+              Meta: 'facebook/react',
+              Netflix: 'netflix/chaosmonkey',
+              Uber: 'uber/RIBs',
+              WordPress: 'WordPress/wordpress-develop',
+            } as Record<string, string>
+            const repo = repoMap[company]
+            const params = {
+              repo,
+              fork: repo
+                .split('/')[1]
+                .toLowerCase()
+                .replace(/.*?([aeiouy])/, 'schm$1'),
+            }
+            return (
+              <WobbleBox key={company}>
+                <motion.div
+                  className="bg-white p-4 rounded-lg shadow-md"
+                  whileHover={{scale: 1.1}}
+                  whileTap={{scale: 0.9}}
+                  // initial={{x: 0}}
+                  // animate={{x: -1000}}
+                >
+                  <Link href={`/fork?${new URLSearchParams(params)}`}>
+                    <Image
+                      src={`/forkable-logos/${company.toLowerCase()}.svg`}
+                      alt={`${company} logo`}
+                      width={100}
+                      height={50}
+                    />
+                  </Link>
+                </motion.div>
+              </WobbleBox>
+            )
+          })}
         </div>
       </div>
 
       <footer className="mt-16 text-center text-[#4a148c] pb-8">
+        <p>
+          *Funding <i>almost</i> secured. We're skipping Seed and Series A though.
+        </p>
+        <br />
         <p className="mb-2">
-          This app uses the GitHub API to create forks. Note: yes this actually works, and no, you shouldn't use it.
+          This app uses the GitHub API to create forks. Note: yes this actually works, and no you shouldn't use it.
         </p>
         <Link
           href="https://x.com/mmkalmmkal"

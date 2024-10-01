@@ -303,7 +303,9 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
                 <div
                   className={`mt-2 text-sm text-[#001F3F] prose max-w-none ${showFullReadme ? '' : 'max-h-40 overflow-hidden'}`}
                 >
-                  <Markdown>{repoInfo.readmeContent}</Markdown>
+                  <Markdown options={{forceInline: true, disableParsingRawHTML: true}}>
+                    {repoInfo.readmeContent}
+                  </Markdown>
                 </div>
                 {repoInfo.readmeContent.length > 500 && (
                   <Button
