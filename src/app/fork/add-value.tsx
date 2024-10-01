@@ -139,7 +139,7 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
           file_sha: item.sha,
         })
         toastId = toast(`Adding meaningful value to codebase`, {
-          description: `File: ${item.path}`,
+          description: `File: ${item.path}`.replace(/(.{20}).+(.{15})$/, '$1...$2'),
           id: toastId,
         })
         if (!blob.content) continue

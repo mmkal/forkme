@@ -256,8 +256,8 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl bg-[#f0ebe0] w-[100vw] h-[100vh] mb-10">
-      <Card className="bg-[#FFF5EC] border-[#001F3F] relative">
+    <div className="container mx-auto p-4 max-w-2xl bg-[#f0ebe0] w-[100vw] h-[100vh] mb-[100px]">
+      <Card className="bg-[#FFF5EC] border-[#001F3F] relative mb-[100px]">
         <CardHeader className="flex flex-row items-center space-x-4 pb-2">
           <Link href="/">
             <Image src="/logo-nobg.png" alt="Fork Logo" width={64} height={64} />
@@ -409,6 +409,7 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
         </CardContent>
       </Card>
       <Toaster />
+      <div className="h-5 w-full"></div>
     </div>
   )
 }

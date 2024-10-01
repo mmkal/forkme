@@ -3,6 +3,7 @@
 import {motion} from 'framer-motion'
 import {GitFork, Zap, Rocket, PartyPopper, SearchCheck} from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {useState} from 'react'
 
 const WobbleBox = ({children}: {children: React.ReactNode}) => {
@@ -175,6 +176,21 @@ export function LandingPageComponent() {
         </WobbleBox>
       </div>
       <WobbleBox>
+        <div className="mt-16 text-center">
+          <h2 className="text-4xl font-bold text-[#1a237e] mb-4">See it in action</h2>
+          <p className="text-xl text-[#4a148c] mb-8">
+            Or just take a look at{' '}
+            <a
+              href="https://github.com/mmkal/hypescript"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#3949ab] hover:underline"
+            >
+              mmkal/hypescript
+            </a>{' '}
+            - a Series-B-funded SaaS fork of TypeScript
+          </p>
+        </div>
         <video
           loop
           muted
@@ -193,6 +209,52 @@ export function LandingPageComponent() {
           Your browser does not support the video tag.
         </video>
       </WobbleBox>
+
+      <div className="mt-16 text-center">
+        <h2 className="text-3xl font-bold text-[#1a237e] mb-8 w-[100vw]">
+          Fork open-source projects built by trusted companies:
+        </h2>
+        <div className="flex flex-wrap justify-center items-center gap-8">
+          {['Google', 'Microsoft', 'Amazon', 'Airbnb', 'Meta', 'Netflix', 'Uber']
+            .flatMap((s, i, arr) => {
+              // if (i === arr.length - 1) return [s, ...arr, ...arr, ...arr]
+              return [s]
+            })
+            .map(company => (
+              <motion.div
+                key={company}
+                className="bg-white p-4 rounded-lg shadow-md"
+                whileHover={{scale: 1.1}}
+                whileTap={{scale: 0.9}}
+                // initial={{x: 0}}
+                // animate={{x: -1000}}
+              >
+                <Link href={`/fork?repo=${company.toLowerCase()}/`}>
+                  <Image
+                    src={`/forkable-logos/${company.toLowerCase()}.svg`}
+                    alt={`${company} logo`}
+                    width={100}
+                    height={50}
+                  />
+                </Link>
+              </motion.div>
+            ))}
+        </div>
+      </div>
+
+      <footer className="mt-16 text-center text-[#4a148c] pb-8">
+        <p className="mb-2">
+          This app uses the GitHub API to create forks. Note: yes this actually works, and no, you shouldn't use it.
+        </p>
+        <Link
+          href="https://x.com/mmkalmmkal"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#3949ab] hover:underline"
+        >
+          Follow me on X
+        </Link>
+      </footer>
     </div>
   )
 }
