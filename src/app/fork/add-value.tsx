@@ -20,19 +20,6 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
     ref: 'heads/' + upstreamRepo.default_branch,
   })
 
-  // Get the default branch
-  // const {data: repo} = await octokit.repos.get({
-  //   owner: codebase.owner,
-  //   repo: codebase.repo,
-  // })
-  // const defaultBranch = repo.default_branch
-
-  // // Get the SHA of the head commit of the default branch
-  // const {data: ref} = await octokit.git.getRef({
-  //   owner: codebase.owner,
-  //   repo: codebase.repo,
-  //   ref: `heads/${defaultBranch}`,
-  // })
   const forkmeBranch = 'forkme'
   const branchExists = await octokit.git
     .getRef({
