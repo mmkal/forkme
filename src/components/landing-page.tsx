@@ -2,6 +2,7 @@
 
 import {motion} from 'framer-motion'
 import {GitFork, Zap, Rocket, PartyPopper, SearchCheck} from 'lucide-react'
+import Image from 'next/image'
 import {useState} from 'react'
 
 const WobbleBox = ({children}: {children: React.ReactNode}) => {
@@ -13,6 +14,8 @@ const WobbleBox = ({children}: {children: React.ReactNode}) => {
       whileHover={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       whileDrag={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       whileFocus={{rotate: 0}}
+      whileTap={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      whileInView={{rotate: [initial, 0, -5, 5, -5, 5, 0, initial], transition: {duration: 0.5}}}
       className="relative"
     >
       {children}
@@ -33,7 +36,7 @@ export function LandingPageComponent() {
           transition={{type: 'spring', stiffness: 260, damping: 20}}
           className="mb-8"
         >
-          <img src="/logo.webp" alt="ForkMe" width={120} height={120} />
+          <Image src="/logo-nobg.png" alt="ForkMe" width={120} height={120} />
           {/* <svg width="120" height="120" viewBox="0 0 100 100" className="drop-shadow-xl">
           <path d="M50 10 L90 50 L50 90 L10 50 Z" fill="#ffd1b3" stroke="#1a237e" strokeWidth="4" />
           <path d="M40 40 L60 40 L60 70 Q50 80 40 70 Z" fill="#bbdefb" stroke="#1a237e" strokeWidth="2" />
@@ -149,8 +152,8 @@ export function LandingPageComponent() {
             <SearchCheck className="w-16 h-16 text-[#1a237e] mb-4" />
             <h3 className="text-2xl font-bold mb-2 text-[#1a237e]">Your Code, Your Brand</h3>
             <p className="text-[#4a148c] text-lg">
-              Add instant value to the codebase using our smart-replace tool. Take full ownership by with upstream
-              branding find-and-replace.
+              Add instant value to the codebase using our smart-replace tool. Take full ownership with upstream branding
+              find-and-replace.
             </p>
           </motion.div>
         </WobbleBox>
@@ -172,7 +175,20 @@ export function LandingPageComponent() {
         </WobbleBox>
       </div>
       <WobbleBox>
-        <video loop muted autoPlay className="w-full max-w-4xl aspect-video rounded-lg shadow-lg m-10">
+        <video
+          loop
+          muted
+          autoPlay
+          playsInline
+          onClick={ev => {
+            const video = ev.target as HTMLVideoElement
+            if (video.paused) void video.play()
+            else void video.pause()
+          }}
+          // controls
+          // controlsList="nodownload noremoteplayback nofullscreen"
+          className="w-full h-[800px] max-w-[80vw] aspect-video rounded-lg DISABLEDshadow-lg mt-5 mb-5"
+        >
           <source src={`/typescript-hypescript.webm`} type="video/webm" />
           Your browser does not support the video tag.
         </video>

@@ -87,6 +87,11 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
       content: upstreamRepo.description ?? '',
       readme: upstreamReadme,
     })
+    const improvedHomepage = improve({
+      path: 'homepage',
+      content: upstreamRepo.homepage ?? '',
+      readme: upstreamReadme,
+    })
 
     await octokit.repos.update({
       owner: codebase.owner,
@@ -94,6 +99,7 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
       default_branch: forkmeBranch,
       name: requestedForkName,
       description: improvedDescription,
+      homepage: improvedHomepage,
     })
   }
 

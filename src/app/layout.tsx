@@ -41,7 +41,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
       {/* <Suspense>
         <PostHogPageview />
       </Suspense> */}
-      <body className="forkmeBody">
+      <body className="forkmeBody bg-[#f0ebe0]">
         {/* <Header /> */}
         <main className="">{children}</main>
         {/* <Toaster /> */}

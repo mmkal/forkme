@@ -11,7 +11,7 @@ export default function ForkPage() {
   const session = useAugmentedSession()
   const someTimeHasPassedQuery = useQuery({
     queryKey: ['someTimeHasPassed'],
-    queryFn: () => new Promise(r => setTimeout(r, 2000)),
+    queryFn: () => new Promise(r => setTimeout(r, 2000)).then(Boolean),
   })
   if (session.status === 'loading') return someTimeHasPassedQuery.isSuccess ? <>Loading...</> : <></>
   // if (!session.data) {

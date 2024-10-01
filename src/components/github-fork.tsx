@@ -230,11 +230,6 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
   })
 
   const handleFork = () => {
-    if (!authenticatedUser) {
-      const pathAndSearch = window.location.href.replace(window.location.origin, '')
-      window.location.href = `/api/auth/signin?${new URLSearchParams({callbackUrl: pathAndSearch}).toString()}`
-      return
-    }
     if (forkMutation.isSuccess) {
       window.open(`https://github.com/${forkMutation.data.owner}/${forkMutation.data.repo}`, '_blank')
     } else {
@@ -243,29 +238,29 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
   }
 
   const addReplacement = () => {
-    setReplacements([...replacements, {from: '', to: ''}])
+    void setReplacements([...replacements, {from: '', to: ''}])
     forkMutation.reset()
   }
 
   const updateReplacement = (index: number, field: 'from' | 'to', value: string) => {
     const newReplacements = [...replacements]
     newReplacements[index][field] = value
-    setReplacements(newReplacements)
+    void setReplacements(newReplacements)
     forkMutation.reset()
   }
 
   const removeReplacement = (index: number) => {
     const newReplacements = replacements.filter((_, i) => i !== index)
-    setReplacements(newReplacements)
+    void setReplacements(newReplacements)
     forkMutation.reset()
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
+    <div className="container mx-auto p-4 max-w-2xl bg-[#f0ebe0] w-[100vw] h-[100vh] mb-10">
       <Card className="bg-[#FFF5EC] border-[#001F3F] relative">
         <CardHeader className="flex flex-row items-center space-x-4 pb-2">
           <Link href="/">
-            <Image src="/logo.webp" alt="Fork Logo" width={64} height={64} />
+            <Image src="/logo-nobg.png" alt="Fork Logo" width={64} height={64} />
           </Link>
           <div>
             <CardTitle className="text-[#001F3F]">{messages.card_title}</CardTitle>
@@ -382,19 +377,30 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
             </div>
             {error && <p className="text-red-500 text-sm">{messages.repo_fetch_error({error: error.message})}</p>}
 
-            <Button
-              onClick={handleFork}
-              disabled={authenticatedUser ? !repoInfo || !forkName || !!forkNameError || forkMutation.isPending : false}
-              className="w-full text-lg py-6 bg-[#87CEEB] text-[#001F3F] hover:bg-[#5CACEE]"
-            >
-              {authenticatedUser
-                ? forkMutation.isPending
+            {!authenticatedUser && (
+              <Button
+                onClick={() => {
+                  const callbackUrl = window.location.href.replace(window.location.origin, '')
+                  window.location.href = `/api/auth/signin?${new URLSearchParams({callbackUrl})}`
+                }}
+                className="w-full text-lg py-6 bg-[#87CEEB] text-[#001F3F] hover:bg-[#5CACEE]"
+              >
+                Login to {messages.fork_button}
+              </Button>
+            )}
+            {!!authenticatedUser && (
+              <Button
+                onClick={handleFork}
+                disabled={!repoInfo || !forkName || !!forkNameError || forkMutation.isPending}
+                className="w-full text-lg py-6 bg-[#87CEEB] text-[#001F3F] hover:bg-[#5CACEE]"
+              >
+                {forkMutation.isPending
                   ? messages.forking_button
                   : forkMutation.isSuccess
                     ? messages.fork_success_button
-                    : messages.fork_button
-                : 'Login to ' + messages.fork_button}
-            </Button>
+                    : messages.fork_button}
+              </Button>
+            )}
 
             {forkMutation.isError && (
               <p className="text-red-500 text-sm">{messages.fork_error({error: forkMutation.error.message})}</p>
