@@ -2,7 +2,7 @@
 'use client'
 
 import {motion} from 'framer-motion'
-import {GitFork, Zap, Rocket, PartyPopper, SearchCheck} from 'lucide-react'
+import {GitFork, Zap, Rocket, PartyPopper, SearchCheck, Github} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {useState} from 'react'
@@ -211,51 +211,57 @@ export function LandingPageComponent() {
         </video>
       </WobbleBox>
 
-      <div className="mt-16 text-center">
+      <div className="mt-16 text-center max-w-[500px]">
         <h2 className="text-3xl font-bold text-[#1a237e] mb-8 max-w-[950vw]">
           Fork open-source projects built by your favourite organizations:
         </h2>
-        <div className="flex flex-wrap justify-center items-center gap-8">
-          {['Google', 'Microsoft', 'Amazon', 'Airbnb', 'Meta', 'Netflix', 'Uber', 'WordPress'].map(company => {
-            const repoMap = {
-              Google: 'google/guava',
-              Microsoft: 'microsoft/typescript',
-              Amazon: 'aws/aws-cdk',
-              Airbnb: 'airbnb/javascript',
-              Meta: 'facebook/react',
-              Netflix: 'netflix/chaosmonkey',
-              Uber: 'uber/RIBs',
-              WordPress: 'WordPress/wordpress-develop',
-            } as Record<string, string>
-            const repo = repoMap[company]
-            const params = {
-              repo,
-              fork: repo
-                .split('/')[1]
-                .toLowerCase()
-                .replace(/.*?([aeiouy])/, 'schm$1'),
-            }
-            return (
-              <WobbleBox key={company}>
-                <motion.div
-                  className="bg-white p-4 rounded-lg shadow-md"
-                  whileHover={{scale: 1.1}}
-                  whileTap={{scale: 0.9}}
-                  // initial={{x: 0}}
-                  // animate={{x: -1000}}
-                >
-                  <Link href={`/fork?${new URLSearchParams(params)}`}>
-                    <Image
-                      src={`/forkable-logos/${company.toLowerCase()}.svg`}
-                      alt={`${company} logo`}
-                      width={100}
-                      height={50}
-                    />
-                  </Link>
-                </motion.div>
-              </WobbleBox>
-            )
-          })}
+        <div className="flex flex-wrap justify-center items-center gap-8 ">
+          {['Google', 'Microsoft', 'Amazon', 'Airbnb', 'Meta', 'Netflix', 'Uber', 'WordPress', 'Forkme'].map(
+            company => {
+              const repoMap = {
+                Google: 'google/guava',
+                Microsoft: 'microsoft/typescript',
+                Amazon: 'aws/aws-cdk',
+                Airbnb: 'airbnb/javascript',
+                Meta: 'facebook/react',
+                Netflix: 'netflix/chaosmonkey',
+                Uber: 'uber/RIBs',
+                WordPress: 'WordPress/wordpress-develop',
+                Forkme: 'mmkal/forkme',
+              } as Record<string, string>
+              const repo = repoMap[company]
+              const params = {
+                repo,
+                fork: repo
+                  .split('/')[1]
+                  .toLowerCase()
+                  .replace(/.*?([aeiouy])/, 'schm$1'),
+              }
+              return (
+                <WobbleBox key={company}>
+                  <motion.div
+                    className="bg-white p-4 rounded-lg shadow-md"
+                    whileHover={{scale: 1.1}}
+                    whileTap={{scale: 0.9}}
+                    // initial={{x: 0}}
+                    // animate={{x: -1000}}
+                  >
+                    <Link href={`/fork?${new URLSearchParams(params)}`}>
+                      <Image
+                        src={`/forkable-logos/${company.toLowerCase()}.svg`.replace(
+                          '/forkable-logos/forkme.svg',
+                          '/logo-nobg.png',
+                        )}
+                        alt={`${company} logo`}
+                        width={100}
+                        height={50}
+                      />
+                    </Link>
+                  </motion.div>
+                </WobbleBox>
+              )
+            },
+          )}
         </div>
       </div>
 
@@ -264,17 +270,27 @@ export function LandingPageComponent() {
           *Funding <i>almost</i> secured. We're skipping Seed and Series A though.
         </p>
         <br />
-        <p className="mb-2">
-          This app uses the GitHub API to create forks. Note: yes this actually works, and no you shouldn't use it.
-        </p>
-        <Link
-          href="https://x.com/mmkalmmkal"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#3949ab] hover:underline"
-        >
-          Follow me on X
-        </Link>
+        <p className="mb-2">Note: yes this actually works, and no, you shouldn't do this.</p>
+        <br />
+        <div className="flex justify-center items-center space-x-4">
+          <a
+            href="https://x.com/mmkalmmkal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#3949ab] hover:underline flex items-center"
+          >
+            <Image src="/forkable-logos/x-black.png" alt="X" width={20} height={20} />
+          </a>
+          <a
+            href="https://github.com/mmkal/forkme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#3949ab] hover:underline flex items-center"
+          >
+            <Github className="w-5 h-5 mr-1" />
+            GitHub
+          </a>
+        </div>
       </footer>
     </div>
   )
