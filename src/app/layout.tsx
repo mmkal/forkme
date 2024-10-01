@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'forkme ⑂',
     description: 'Fork yourself and get funded faster',
-    images: ['/logo.webp'], // Add your Open Graph image path here
+    images: ['/logos/logo.webp'], // Add your Open Graph image path here
   },
   twitter: {
     card: 'summary_large_image',
     title: 'forkme ⑂',
     description: 'Fork yourself and get funded faster',
-    images: ['/logo.webp'], // Add your Twitter card image path here
+    images: ['/logos/logo.webp'], // Add your Twitter card image path here
   },
 }
 

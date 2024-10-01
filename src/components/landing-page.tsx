@@ -39,7 +39,7 @@ export function LandingPageComponent() {
           transition={{type: 'spring', stiffness: 260, damping: 20}}
           className="mb-8"
         >
-          <Image src="/logo-nobg.png" alt="ForkMe" width={120} height={120} />
+          <Image src="/logos/nobg.png" alt="ForkMe" width={120} height={120} />
           {/* <svg width="120" height="120" viewBox="0 0 100 100" className="drop-shadow-xl">
           <path d="M50 10 L90 50 L50 90 L10 50 Z" fill="#ffd1b3" stroke="#1a237e" strokeWidth="4" />
           <path d="M40 40 L60 40 L60 70 Q50 80 40 70 Z" fill="#bbdefb" stroke="#1a237e" strokeWidth="2" />
@@ -207,7 +207,7 @@ export function LandingPageComponent() {
           // controlsList="nodownload noremoteplayback nofullscreen"
           className="w-full h-[800px] max-h-[100vw] max-w-[80vw] aspect-video rounded-lg DISABLEDshadow-lg mt-5 mb-5"
         >
-          <source src={`/typescript-hypescript.webm`} type="video/webm" />
+          <source src={`/videos/typescript-hypescript.webm`} type="video/webm" />
           Your browser does not support the video tag.
         </video>
       </WobbleBox>
@@ -249,9 +249,9 @@ export function LandingPageComponent() {
                   >
                     <Link href={`/fork?${new URLSearchParams(params)}`}>
                       <Image
-                        src={`/forkable-logos/${company.toLowerCase()}.svg`.replace(
-                          '/forkable-logos/forkme.svg',
-                          '/logo-nobg.png',
+                        src={`/logos/forkable/${company.toLowerCase()}.svg`.replace(
+                          '/logos/forkable/forkme.svg',
+                          '/logos/nobg.png',
                         )}
                         alt={`${company} logo`}
                         width={100}
@@ -271,7 +271,7 @@ export function LandingPageComponent() {
           *Funding <i>almost</i> secured. We're skipping Seed and Series A though.
         </p>
         <br />
-        <p className="mb-2">Note: yes this actually works, and no, you shouldn't do this.</p>
+        <p className="mb-2">Note: yes this actually works, and no, you shouldn't actually use it.</p>
         <br />
         <div className="flex justify-center items-center space-x-4">
           <a
@@ -280,7 +280,7 @@ export function LandingPageComponent() {
             rel="noopener noreferrer"
             className="text-[#3949ab] hover:underline flex items-center"
           >
-            <Image src="/forkable-logos/x-black.png" alt="X" width={20} height={20} />
+            <Image src="/logos/forkable/x-black.png" alt="X" width={20} height={20} />
           </a>
           <a
             href="https://github.com/mmkal/forkme"

@@ -260,7 +260,7 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
       <Card className="bg-[#FFF5EC] border-[#001F3F] relative mb-[100px]">
         <CardHeader className="flex flex-row items-center space-x-4 pb-2">
           <Link href="/">
-            <Image src="/logo-nobg.png" alt="Fork Logo" width={64} height={64} />
+            <Image src="/logos/nobg.png" alt="Fork Logo" width={64} height={64} />
           </Link>
           <div>
             <CardTitle className="text-[#001F3F]">{messages.card_title}</CardTitle>
