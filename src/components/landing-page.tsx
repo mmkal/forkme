@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client'
 
-import {motion} from 'framer-motion'
+import {motion, useReducedMotion} from 'framer-motion'
 import {GitFork, Zap, Rocket, PartyPopper, SearchCheck, Github} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -9,15 +9,16 @@ import {useState} from 'react'
 
 const WobbleBox = ({children}: {children: React.ReactNode}) => {
   const [initial] = useState(() => Math.random() * 10 - 5)
+  const reducedMotion = useReducedMotion()
 
   return (
     <motion.div
       initial={{rotate: initial}}
-      whileHover={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
+      whileHover={reducedMotion ? {} : {rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       // whileDrag={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
       // whileFocus={{rotate: 0}}
       // whileTap={{rotate: [initial, 0, -5, 5, -5, 5, 0], transition: {duration: 0.5}}}
-      whileInView={{rotate: [initial, 0, -5, 5, -5, 5, 0, initial], transition: {duration: 0.5}}}
+      whileInView={reducedMotion ? {} : {rotate: [initial, 0, -5, 5, -5, 5, 0, initial], transition: {duration: 0.5}}}
       className="relative"
     >
       {children}

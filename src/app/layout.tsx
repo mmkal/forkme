@@ -1,10 +1,12 @@
+import {MotionConfig} from 'framer-motion'
 import {Metadata, Viewport} from 'next'
-import '../styles/globals.css'
 import {Alegreya as MainFont} from 'next/font/google'
 // import {Suspense} from 'react'
 // import {Header} from '../components/Header'
 // import {PostHogPageview} from './providers'
 // import {Toaster} from '~/components/ui/toaster'
+
+import '../styles/globals.css'
 
 const mainFont = MainFont({
   subsets: ['latin'],
@@ -42,9 +44,11 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         <PostHogPageview />
       </Suspense> */}
       <body className="forkmeBody bg-[#f0ebe0]">
-        {/* <Header /> */}
-        <main className="">{children}</main>
-        {/* <Toaster /> */}
+        <MotionConfig reducedMotion="user">
+          {/* <Header /> */}
+          <main className="">{children}</main>
+          {/* <Toaster /> */}
+        </MotionConfig>
       </body>
     </html>
   )
