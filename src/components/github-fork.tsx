@@ -441,8 +441,7 @@ export const defaultMessages = {
     'Timed out waiting for fork to be available. Please try refreshing the page or check your GitHub account.',
   fork_success_button: `Open Fork`,
   fork_success_title: 'Fork successful!',
-  fork_success_description: ({owner, repo}: {owner: string; repo: string}) =>
-    `Your fork is ready at https://github.com/${owner}/${repo}`,
+  fork_success_description: (_params: {owner: string; repo: string}) => `Your fork is ready`,
   fork_error_title: 'Fork failed',
   repo_fetch_error: ({error}: {error: string}) => `Error fetching repository information: ${error}`,
   fork_error: ({error}: {error: string}) => `Error forking repository: ${error}`,

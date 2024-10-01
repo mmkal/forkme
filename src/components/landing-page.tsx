@@ -70,8 +70,8 @@ export function LandingPageComponent() {
           <GitFork className="w-12 h-12 text-[#1a237e]" />
         </motion.div>
 
-        <h2 className="text-4xl font-bold mb-6 text-[#1a237e]">GitHub Repo Fork-a-tron 3000</h2>
-        <p className="mb-4 text-[#4a148c] text-lg">Enter a GitHub repo and watch the AI magic happen!</p>
+        <h2 className="text-4xl font-bold mb-6 text-[#1a237e]">Fork me, Beautiful</h2>
+        <p className="mb-4 text-[#4a148c] text-lg">Enter a GitHub repo and watch the AI magic happen</p>
 
         <div className="space-y-6">
           <WobbleBox>
@@ -122,7 +122,7 @@ export function LandingPageComponent() {
             <Zap className="w-16 h-16 text-[#1a237e] mb-4" />
             <h3 className="text-2xl font-bold mb-2 text-[#1a237e]">AI-Powered Zap-o-matic</h3>
             <p className="text-[#4a148c] text-lg">
-              Our AI will zap your code into a masterpiece faster than you can say "neural network"!
+              Our AI will zap your code into a masterpiece faster than you can say "mechanistic interpretability"
             </p>
           </motion.div>
         </WobbleBox>
