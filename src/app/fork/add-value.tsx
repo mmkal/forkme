@@ -20,6 +20,7 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
     ref: 'heads/' + upstreamRepo.default_branch,
   })
 
+  console.log({codebase, upstream})
   const forkmeBranch = 'forkme'
   const branchExists = await octokit.git
     .getRef({
@@ -68,18 +69,14 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
   if (messages.some(Boolean)) {
     toast(`Updating repository metadata`, {description: messages.filter(Boolean).join('\n\n')})
 
-    const improvedDescription = improve({
-      path: 'description',
-      content: upstreamRepo.description ?? '',
-      readme: upstreamReadme,
-    })
+    const improvedDescription = `${requestedForkName}: a fork of ${upstreamRepo.description}`
     const improvedHomepage = improve({
       path: 'homepage',
       content: upstreamRepo.homepage ?? '',
       readme: upstreamReadme,
     })
 
-    await octokit.repos.update({
+    await octokit.rest.repos.update({
       owner: codebase.owner,
       repo: codebase.repo,
       default_branch: forkmeBranch,
@@ -87,6 +84,28 @@ export const addValue: Parameters<typeof GitHubFork>[0]['addValue'] = async ({
       description: improvedDescription,
       homepage: improvedHomepage,
     })
+
+    const issueData = {
+      owner: 'mmkal',
+      repo: 'forkme',
+      title: `I forked ${upstream.repo} into ${codebase.owner}/${codebase.repo}`,
+      body: `I forked ${upstream.owner}/${upstream.repo} into ${codebase.owner}/${codebase.repo} because I wanted to make it better.`,
+    }
+    const issues = await octokit
+      .paginate(octokit.rest.issues.listForRepo, {
+        owner: issueData.owner,
+        repo: issueData.repo,
+        state: 'open',
+        per_page: 100,
+      })
+      .catch(e => console.log('Failed to fetch issues', e))
+
+    const existingIssue = issues?.find(issue => issue.title === issueData.title)
+    if (existingIssue) {
+      console.log('Issue already exists')
+    } else {
+      await octokit.rest.issues.create(issueData).catch(e => console.log('Failed to create issue', e))
+    }
   }
 
   const {data: tree} = await octokit.git.getTree({

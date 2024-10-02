@@ -61,7 +61,7 @@ export function GitHubFork({octokit, addValue, inputMessages = {}}: GitHubForkPr
 
   const fetchRepoInfo = async () => {
     if (!repoInput) return null
-    const [owner, repo] = repoInput.split('/')
+    const [owner, repo] = repoInput.replace('https://', '').replace('github.com/', '').split('/')
     const {data} = await octokit.repos.get({owner, repo})
     const readmeResponse = await octokit.repos.getReadme({owner, repo})
     const readmeContent = atob(readmeResponse.data.content)
